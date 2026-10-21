@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Elettrotecnica Gym Quiz</title>
+  <link rel="stylesheet" href="styles.css">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="logo-area">
+      <div class="logo-icon">⚡</div>
+      <div>
+        <div class="logo-title">Elettrotecnica Gym</div>
+        <div class="logo-subtitle">Calcolo Mentale • Timer 2 min</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <a href="../index.html" class="btn-icon" title="Torna all'Hub" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">🏠</a>
+      <button class="btn-icon" id="btnSound" title="Attiva/Disattiva Suono">🔊</button>
+      <button class="btn-icon" id="btnStats" title="Statistiche">📊</button>
+      <button class="btn-icon" id="btnRestart" title="Ricomincia Quiz">🔄</button>
+    </div>
+  </header>
+
+  <!-- Filter Bar (Primo Parziale, Secondo Parziale, Tutti) -->
+  <div class="filter-bar">
+    <button class="tab-btn active" data-filter="all">Tutti gli Esercizi</button>
+    <button class="tab-btn" data-filter="1">1° Parziale (DC, Thévenin, Op-Amp, AC)</button>
+    <button class="tab-btn" data-filter="2">2° Parziale (Transitori, RLC, Trifase)</button>
+  </div>
+
+  <!-- Main Exercise View -->
+  <main>
+    <!-- Status & Timer Bar -->
+    <div class="status-bar">
+      <div class="counter-badge" id="exerciseCounter">Esercizio 1 / 23</div>
+
+      <div class="timer-container">
+        <div class="timer-box" id="timerBox">
+          <span>⏱️</span>
+          <span id="timerDisplay">02:00</span>
+        </div>
+        <button class="btn-icon" id="btnPause" title="Pausa Timer" style="width:34px; height:34px; font-size:14px;">⏸️</button>
+      </div>
+
+      <div class="streak-badge" id="streakCounter">🔥 0</div>
+    </div>
+
+    <!-- 2-Minute Progress Bar -->
+    <div class="timer-progress-wrap">
+      <div class="timer-progress-bar" id="timerProgressBar"></div>
+    </div>
+
+    <!-- Active Exercise Card -->
+    <div class="exercise-card">
+      <div class="topic-tag" id="topicTag">1° Parziale • Legge di Ohm</div>
+      <div class="question-text" id="questionText">Caricamento esercizio...</div>
+
+      <!-- Real Vector Circuit Diagram -->
+      <div class="circuit-frame" id="circuitBox">
+        <!-- SVG will be dynamically injected here -->
+      </div>
+
+      <!-- Section A: Multiple Choice Options -->
+      <div class="options-grid" id="optionsGrid">
+        <!-- Option buttons dynamically generated -->
+      </div>
+
+      <!-- Section B: Numeric Input & Gym Keypad -->
+      <div class="input-section" id="inputSection" style="display: none;">
+        <div class="input-display">
+          <span>Risultato:</span>
+          <div>
+            <span id="inputDisplayVal">_</span>
+            <span class="unit-label" id="inputUnit">V</span>
+          </div>
+        </div>
+
+        <div class="gym-keypad">
+          <button class="key-btn" data-val="1">1</button>
+          <button class="key-btn" data-val="2">2</button>
+          <button class="key-btn" data-val="3">3</button>
+
+          <button class="key-btn" data-val="4">4</button>
+          <button class="key-btn" data-val="5">5</button>
+          <button class="key-btn" data-val="6">6</button>
+
+          <button class="key-btn" data-val="7">7</button>
+          <button class="key-btn" data-val="8">8</button>
+          <button class="key-btn" data-val="9">9</button>
+
+          <button class="key-btn" data-val="+/-">±</button>
+          <button class="key-btn" data-val="0">0</button>
+          <button class="key-btn" data-val=".">.</button>
+
+          <button class="key-btn action-delete" data-val="del" style="grid-column: span 3;">⌫ Cancella</button>
+          <button class="key-btn action-confirm" data-val="submit">CONFERMA RISPOSTA ➔</button>
+        </div>
+      </div>
+
+      <!-- Section C: Feedback & Step-by-Step Correction -->
+      <div class="feedback-card" id="feedbackCard" style="display: none;">
+        <div class="feedback-header" id="feedbackHeader">🎉 CORRETTO!</div>
+        <div class="explanation-body" id="explanationBody">
+          <!-- Step-by-step math and gym trick inserted here -->
+        </div>
+        <button class="btn-next" id="btnNext">PROSSIMO ESERCIZIO ➔</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Stats Modal -->
+  <div class="modal-overlay" id="statsModal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-title">
+        <span>📊 Statistiche di Allenamento</span>
+        <button class="btn-icon" id="btnCloseStats" style="width:30px; height:30px;">✕</button>
+      </div>
+      <div class="stat-row">
+        <span>Esercizi Risolti:</span>
+        <span class="stat-val" id="statAnswered">0</span>
+      </div>
+      <div class="stat-row">
+        <span>Risposte Corrette:</span>
+        <span class="stat-val" id="statCorrect">0</span>
+      </div>
+      <div class="stat-row">
+        <span>Precisione Globale:</span>
+        <span class="stat-val" id="statAccuracy">0%</span>
+      </div>
+      <div class="stat-row">
+        <span>Streak Attuale:</span>
+        <span class="stat-val" id="statStreak">0</span>
+      </div>
+      <div class="stat-row">
+        <span>Miglior Streak:</span>
+        <span class="stat-val" id="statBestStreak">0</span>
+      </div>
+      <div class="stat-row">
+        <span>1° Parziale (Corrette/Totale):</span>
+        <span class="stat-val" id="statP1">0 / 0</span>
+      </div>
+      <div class="stat-row">
+        <span>2° Parziale (Corrette/Totale):</span>
+        <span class="stat-val" id="statP2">0 / 0</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="exercises.js"></script>
+  <script src="audio.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elettrotecnica Polimi — Hub Completo di Studio & Simulazione</title>
+  <meta name="description" content="Piattaforma web completa per lo studio di Elettrotecnica al Politecnico di Milano: 16 capitoli di teoria, simulatore d'esame con 210 esercizi, gym quiz rapido da 200 esercizi e materiali scaricabili.">
+
+  <!-- Theme color for mobile browser bars -->
+  <meta name="theme-color" content="#0b132b">
+
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-primary: #070d19;
+      --bg-secondary: #0d172a;
+      --bg-card: #132238;
+      --bg-card-hover: #192d4a;
+      --border-color: #1e3557;
+      --border-highlight: #38bdf8;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-blue: #38bdf8;
+      --accent-indigo: #818cf8;
+      --accent-emerald: #34d399;
+      --accent-amber: #fbbf24;
+      --accent-rose: #f43f5e;
+      --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border-color);
+      --shadow-hover: 0 20px 40px -15px rgba(56, 189, 248, 0.25), 0 0 0 1px var(--border-highlight);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f1f5f9;
+      --border-color: #e2e8f0;
+      --border-highlight: #0284c7;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --accent-blue: #0284c7;
+      --accent-indigo: #6366f1;
+      --accent-emerald: #059669;
+      --accent-amber: #d97706;
+      --accent-rose: #e11d48;
+      --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--border-color);
+      --shadow-hover: 0 20px 35px -10px rgba(2, 132, 199, 0.2), 0 0 0 1px var(--border-highlight);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Bar */
+    header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #0284c7, #6366f1);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+    }
+
+    .brand-text h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-text span {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      display: block;
+      line-height: 1.2;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .theme-toggle-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .theme-toggle-btn:hover {
+      border-color: var(--accent-blue);
+    }
+
+    /* Hero Section */
+    .hero {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 56px 24px 36px;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: var(--accent-blue);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .hero h2 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .hero h2 .gradient-text {
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      max-width: 750px;
+      margin: 0 auto 32px;
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .stat-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    .stat-pill strong {
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+
+    /* Cards Grid */
+    .apps-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 24px 60px;
+      width: 100%;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: -0.01em;
+    }
+
+    .grid-apps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+
+    .app-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-card);
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .app-card:hover {
+      background: var(--bg-card-hover);
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-4px);
+    }
+
+    .card-glow {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+    }
+    .glow-blue { background: linear-gradient(90deg, #38bdf8, #818cf8); }
+    .glow-purple { background: linear-gradient(90deg, #a855f7, #ec4899); }
+    .glow-emerald { background: linear-gradient(90deg, #34d399, #059669); }
+    .glow-amber { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+
+    .card-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    .icon-blue { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+    .icon-purple { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+    .icon-emerald { background: rgba(52, 211, 153, 0.15); color: #34d399; }
+    .icon-amber { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+
+    .tag-chip {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .tag-blue { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .tag-purple { background: rgba(168, 85, 247, 0.15); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); }
+    .tag-emerald { background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+    .tag-amber { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+
+    .app-card h3 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+
+    .app-card p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+      flex-grow: 1;
+    }
+
+    .feature-list {
+      list-style: none;
+      margin-bottom: 24px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 16px;
+    }
+
+    .feature-list li {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .feature-list li svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      color: var(--accent-emerald);
+    }
+
+    .btn-card {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      text-align: center;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+    }
+    .btn-purple { background: linear-gradient(135deg, #7c3aed, #6d28d9); box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3); }
+    .btn-emerald { background: linear-gradient(135deg, #059669, #047857); box-shadow: 0 4px 14px rgba(5, 150, 105, 0.3); }
+    .btn-amber { background: linear-gradient(135deg, #d97706, #b45309); box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3); }
+
+    /* Downloads Grid */
+    .downloads-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .download-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-decoration: none;
+      color: inherit;
+    }
+    .download-card:hover {
+      border-color: var(--border-highlight);
+      background: var(--bg-card-hover);
+    }
+
+    .download-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .file-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+    .pdf-bg { background: rgba(244, 63, 94, 0.15); color: #f43f5e; }
+    .apk-bg { background: rgba(52, 211, 153, 0.15); color: #34d399; }
+    .md-bg { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+
+    .download-text h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .download-text span {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    .download-action {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent-blue);
+    }
+
+    /* Footer */
+    footer {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-color);
+      margin-top: auto;
+      padding: 32px 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    footer a {
+      color: var(--accent-blue);
+      text-decoration: none;
+    }
+
+    @media (max-width: 640px) {
+      .hero { padding: 36px 16px 24px; }
+      .stats-row { gap: 16px; }
+      .app-card { padding: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-text">
+          <h1>Elettrotecnica Polimi</h1>
+          <span>ELN / MTM • Ingegneria</span>
+        </div>
+      </a>
+      <div class="nav-actions">
+        <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Cambia Tema">
+          <span id="themeIcon">☀️</span>
+          <span id="themeLabel">Tema Chiaro</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span>🎓 Portale Ufficiale di Studio & Esercitazione</span>
+    </div>
+    <h2>
+      Supera l'esame di <span class="gradient-text">Elettrotecnica</span><br>con il massimo dei voti
+    </h2>
+    <p>
+      La suite completa per preparare il 1° e 2° Parziale: teoria rigorosa, simulatore con punteggi e penalità WeBeep, esercizi a tempo e raccolta d'esame estesa.
+    </p>
+    <div class="stats-row">
+      <div class="stat-pill">📚 <strong>16 Capitoli</strong> di Teoria Completa</div>
+      <div class="stat-pill">📝 <strong>210 Esercizi</strong> Simulatore 1° Parziale</div>
+      <div class="stat-pill">🏋️ <strong>200 Esercizi</strong> Gym Quiz Rapidi</div>
+      <div class="stat-pill">📐 <strong>410+ Schemi SVG</strong> Vettoriali Reali</div>
+    </div>
+  </section>
+
+  <!-- Main Tools Grid -->
+  <main class="apps-section">
+    <div class="section-title">
+      <span>🚀 Seleziona lo Strumento di Studio</span>
+    </div>
+
+    <div class="grid-apps">
+      <!-- Card 1: Teoria -->
+      <a href="teoria/index.html" class="app-card">
+        <div class="card-glow glow-blue"></div>
+        <div class="card-header-top">
+          <div class="card-icon icon-blue">📖</div>
+          <span class="tag-chip tag-blue">1° & 2° Parziale</span>
+        </div>
+        <h3>Teoria Completa</h3>
+        <p>
+          Manuale completo in 16 capitoli: dimostrazioni rigorose, formule in KaTeX, schemi elettrici SVG, punti chiave, trabocchetti tipici dei docenti ed esempi notevoli svolti.
+        </p>
+        <ul class="feature-list">
+          <li>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            16 capitoli completi (11 per il 1° P. e 5 per il 2° P.)
+          </li>
+          <li>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            Motore di ricerca istantaneo su tutta la teoria
+          </li>
+          <li>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            Formulario rapido & Trabocchetti d'esame Polimi
+          </li>
+        </ul>
+        <span class="btn-card">Apri Manuale di Teoria ➔</span>
+      </a>
+
+      <!-- Card 2: Simulatore Esame 1° Parziale -->
+      <a href="simulatore/index.html" class="app-card">
+        <div class="card-glow glow-purple"></div>
+        <div class="card-header-top">
+          <div class="card-icon icon-purple">📝</div>
+          <span class="tag-chip tag-purple">Livello Esame</span>
+        </div>
+        <h3>Simulatore d'Esame 1°P</h3>
+        <p>
+          Banca dati di 210 compiti d'esame complessi. Simula una vera prova WeBeep bilanciata su tutti i 6 argomenti con timer alla rovescia, penalità reali e voto in trentesimi (/30 e /30L).
+        </p>
+        <ul class="feature-list">
+          <li>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            210 Esercizi (107 a scelta multipla + 103 numerici)
+          </li>
+          <li>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            Punteggi ufficiali (+2.5 corretto, -0.625 errato)
+          </li>
+          <li>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            Soluzioni dettagliate passo-passo con formule KaTeX
+          </li>
+        </ul>
+        <span class="btn-card btn-purple">Avvia Simulatore ➔</span>
+      </a>
+
+      <!-- Card 3: Gym Quiz Rapido -->
+      <a href="gym-quiz/index.html" class="app-card">
+        <div class="card-glow glow-emerald"></div>
+        <div class="card-header-top">
+          <div class="card-icon icon-emerald">🏋️</div>
+          <span class="tag-chip tag-emerald">Calcolo a Mente</span>
+        </div>
+        <h3>Gym Quiz Elettrotecnica</h3>
+        <p>
+          200 esercizi veloci con numeri semplici da risolvere a mente tra una serie e l'altra in palestra o durante gli spostamenti. Timer di 2 minuti e spiegazione istantanea.
+        </p>
+        <ul class="feature-list">
+          <li>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            100 esercizi 1° Parziale + 100 esercizi 2° Parziale
+          </li>
+          <li>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            Timer di 120s con opzione Pausa
+          </li>
+          <li>
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            Tastierino touch su schermo per smartphone
+          </li>
+        </ul>
+        <span class="btn-card btn-emerald">Inizia Gym Quiz ➔</span>
+      </a>
+    </div>
+
+    <!-- Downloads Section -->
+    <div class="section-title">
+      <span>📥 Documenti e Download Disponibili</span>
+    </div>
+
+    <div class="downloads-grid">
+      <a href="downloads/Eserciziario_Temi_d_Esame_Versione_Estesa.pdf" download class="download-card">
+        <div class="download-info">
+          <div class="file-icon pdf-bg">PDF</div>
+          <div class="download-text">
+            <h4>Eserciziario Temi d'Esame Esteso</h4>
+            <span>406 Pagine • 99 Es. PI1 Evidenziati • Prove 2023-2024</span>
+          </div>
+        </div>
+        <span class="download-action">Scarica PDF (6.2 MB)</span>
+      </a>
+
+      <a href="downloads/elettrotecnica-gym-quiz.apk" download class="download-card">
+        <div class="download-info">
+          <div class="file-icon apk-bg">APK</div>
+          <div class="download-text">
+            <h4>App Android Gym Quiz (.apk)</h4>
+            <span>Installabile offline su smartphone Android</span>
+          </div>
+        </div>
+        <span class="download-action">Scarica APK (129 KB)</span>
+      </a>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>
+      Piattaforma didattica per il corso di <strong>Elettrotecnica (ELN / MTM)</strong> — Politecnico di Milano.
+    </p>
+    <p style="margin-top: 6px;">
+      Basato sui temi d'esame dei Proff. Dario D'Amore, Lorenzo Codecasa, Paolo Maffezzoni, Sergio Guzzetti e sul manuale di Renzo Perfetti.
+    </p>
+  </footer>
+
+  <script>
+    // Theme toggle logic with localStorage
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeLabel = document.getElementById('themeLabel');
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      if (theme === 'light') {
+        themeIcon.textContent = '🌙';
+        themeLabel.textContent = 'Tema Scuro';
+      } else {
+        themeIcon.textContent = '☀️';
+        themeLabel.textContent = 'Tema Chiaro';
+      }
+      try { localStorage.setItem('hub_theme', theme); } catch(e) {}
+    }
+
+    const savedTheme = (() => {
+      try { return localStorage.getItem('hub_theme'); } catch(e) { return null; }
+    })();
+
+    if (savedTheme) {
+      applyTheme(savedTheme);
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+      applyTheme('light');
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      applyTheme(current === 'light' ? 'dark' : 'light');
+    });
+  </script>
+</body>
+</html>

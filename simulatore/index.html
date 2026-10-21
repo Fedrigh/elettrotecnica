@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulatore 1° Parziale di Elettrotecnica | Politecnico di Milano</title>
+  
+  <!-- Local KaTeX for 100% Offline Math Rendering Styles -->
+  <link rel="stylesheet" href="lib/katex/katex.min.css">
+
+  <!-- Application Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-section">
+        <span class="brand-badge">Polimi ELN/MTM</span>
+        <div>
+          <div class="brand-title">Simulatore Primo Parziale di Elettrotecnica</div>
+          <div class="brand-sub">Banca Dati Ufficiale 210 Esercizi Esame • Prof. D'Amore, Codecasa, Maffezzoni, Guzzetti</div>
+        </div>
+      </div>
+
+      <nav class="header-nav">
+        <a href="../index.html" class="nav-btn" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;"><span>🏠</span><span>Hub</span></a>
+        <button id="nav-practice-btn" class="nav-btn active">
+          <span>📚</span>
+          <span>Eserciziario</span>
+        </button>
+        <button id="nav-exam-btn" class="nav-btn">
+          <span>⏱️</span>
+          <span>Simulazione d'Esame</span>
+        </button>
+        <button id="nav-formula-btn" class="nav-btn">
+          <span>📐</span>
+          <span>Formulario</span>
+        </button>
+        <button id="theme-toggle-btn" class="theme-toggle-btn" title="Cambia tema">
+          🌙
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Application Body -->
+  <main class="app-main">
+    
+    <!-- Stats Ribbon -->
+    <section class="stats-ribbon">
+      <div class="stat-card">
+        <div class="stat-icon">📑</div>
+        <div class="stat-content">
+          <div class="stat-val" id="stat-total">210</div>
+          <div class="stat-lbl">Totale Esercizi</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✍️</div>
+        <div class="stat-content">
+          <div class="stat-val" id="stat-done">0</div>
+          <div class="stat-lbl">Esercizi Svolti</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-content">
+          <div class="stat-val" id="stat-correct">0</div>
+          <div class="stat-lbl">Risolti Corretti</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+          <div class="stat-val" id="stat-accuracy">0%</div>
+          <div class="stat-lbl">Accuratezza Globale</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 1: Allenamento / Eserciziario -->
+    <section id="practice-view" class="view-section active">
+      
+      <!-- Filter Toolbar -->
+      <div class="toolbar-card">
+        <div class="toolbar-grid">
+          <div class="form-group">
+            <label for="filter-topic">Argomento del 1° Parziale</label>
+            <select id="filter-topic" class="form-control">
+              <option value="all">Tutti gli argomenti (210)</option>
+              <option value="Circuiti in Regime Stazionario (DC)">1. Regime Stazionario DC & MNA</option>
+              <option value="Thévenin, Norton & Generatori Pilotati">2. Thévenin, Norton & Generatori Pilotati</option>
+              <option value="Bipoli Non Lineari & Diodi Ideali">3. Bipoli Non Lineari & Diodi Ideali</option>
+              <option value="Amplificatori Operazionali (OP-AMP)">4. Amplificatori Operazionali (OP-AMP)</option>
+              <option value="Doppi Bipoli & Trasformatore Ideale">5. Doppi Bipoli & Trasformatore Ideale</option>
+              <option value="Regime Sinusoidale Monofase (AC)">6. Regime Sinusoidale Monofase (AC)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="filter-difficulty">Livello di Difficoltà</label>
+            <select id="filter-difficulty" class="form-control">
+              <option value="all">Tutte le difficoltà</option>
+              <option value="Base">Base</option>
+              <option value="Intermedio">Intermedio</option>
+              <option value="Avanzato">Avanzato</option>
+              <option value="Stile Esame Complesso">Stile Esame Complesso</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="filter-type">Formato Quesito</label>
+            <select id="filter-type" class="form-control">
+              <option value="all">Tutti i formati</option>
+              <option value="mcq">Risposta Multipla (Stile WeBeep)</option>
+              <option value="numeric">Esercizio Numerico / Calcolo Aperto</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="filter-professor">Stile Docente</label>
+            <select id="filter-professor" class="form-control">
+              <option value="all">Tutti i docenti</option>
+              <option value="Prof. D'Amore">Prof. Dario D'Amore</option>
+              <option value="Prof. Codecasa">Prof. Lorenzo Codecasa</option>
+              <option value="Prof. Maffezzoni">Prof. Paolo Maffezzoni</option>
+              <option value="Prof. Guzzetti">Prof. Sergio Guzzetti</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="filter-status">Stato Risoluzione</label>
+            <select id="filter-status" class="form-control">
+              <option value="all">Tutti</option>
+              <option value="todo">Da svolgere</option>
+              <option value="correct">Risolti Corretti ✓</option>
+              <option value="wrong">Errati ✗</option>
+              <option value="bookmarked">Preferiti ★</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="flex: 2;">
+            <label for="input-search">Ricerca Libera</label>
+            <input type="text" id="input-search" class="form-control" placeholder="Cerca ID (es. TH-01), parole chiave, formule...">
+          </div>
+
+          <div class="toolbar-actions">
+            <button id="btn-reset-filters" class="btn btn-secondary" title="Reimposta tutti i filtri">
+              <span>↺</span> Reimposta
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Summary & Pagination bar -->
+        <div class="filter-summary">
+          <div>
+            Mostrati <strong id="filtered-count">210</strong> di <strong id="total-count">210</strong> esercizi
+          </div>
+          <div class="pagination-controls">
+            <button id="btn-prev-page" class="page-btn">◀ Precedente</button>
+            <span id="pagination-info" style="font-weight: 600;">Pagina 1 di 21</span>
+            <button id="btn-next-page" class="page-btn">Successivo ▶</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exercise Cards Container -->
+      <div id="exercises-list" class="exercises-list">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </section>
+
+    <!-- VIEW 2: Simulazione d'Esame Ufficiale -->
+    <section id="exam-view" class="view-section">
+      
+      <!-- Exam Setup Screen -->
+      <div id="exam-setup-section">
+        <!-- Populated dynamically by showExamSetup() -->
+      </div>
+
+      <!-- Exam Active Simulation Screen -->
+      <div id="exam-active-section" style="display: none;">
+        <div class="exam-view-header">
+          <div>
+            <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--polimi-blue);">Simulazione Ufficiale 1° Parziale in Corso</h3>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Rispondi ai quesiti e consegna prima dello scadere del timer.</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div id="exam-timer" class="exam-timer-display">⏱️ 90:00</div>
+            <button id="btn-exam-submit" class="btn btn-danger">Consegna Prova</button>
+          </div>
+        </div>
+
+        <div class="exam-layout-grid">
+          <!-- Current Question Container -->
+          <div class="exam-main-panel">
+            <div id="exam-question-container">
+              <!-- Rendered by renderExamQuestion() -->
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
+              <button id="btn-exam-prev" class="btn btn-secondary">◀ Quesito Precedente</button>
+              <button id="btn-exam-next" class="btn btn-primary">Quesito Successivo ▶</button>
+            </div>
+          </div>
+
+          <!-- Question Navigator Palette -->
+          <aside class="palette-box">
+            <div class="palette-title">Mappa dei Quesiti</div>
+            <div id="exam-palette" class="palette-grid">
+              <!-- Buttons 1..N generated dynamically -->
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.25rem;">
+              <div><span style="display:inline-block; width:10px; height:10px; background:#dbeafe; border:1px solid #93c5fd; border-radius:2px; margin-right:4px;"></span> Risposto</div>
+              <div><span style="display:inline-block; width:10px; height:10px; background:var(--bg-subtle); border:1px solid var(--border-color); border-radius:2px; margin-right:4px;"></span> Non Risposto</div>
+              <div><span style="color:#f59e0b; margin-right:4px;">★</span> Segnato per revisione</div>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      <!-- Exam Result / Report Screen -->
+      <div id="exam-result-section" style="display: none;">
+        <!-- Populated dynamically by renderExamReport() -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Formula Sheet Modal -->
+  <div id="formula-modal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📐 Formulario Ufficiale 1° Parziale di Elettrotecnica</h3>
+        <button id="formula-close-btn" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="formula-tabs-container" class="formula-tab-nav">
+          <!-- Rendered dynamically -->
+        </div>
+        <div id="formula-cards-container">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <p>
+      <strong>Simulatore 1° Parziale di Elettrotecnica</strong> • Corso di Ingegneria (ELN / MTM) • Politecnico di Milano
+    </p>
+    <p style="font-size: 0.75rem; margin-top: 0.35rem; opacity: 0.8;">
+      Applicazione Standalone Offline-First • 210 Esercizi Verificati • Motore Grafico Vettoriale SVG • Formule KaTeX TeX-Compliant
+    </p>
+  </footer>
+
+  <!-- Local KaTeX Offline Engine & Auto-Render -->
+  <script src="lib/katex/katex.min.js"></script>
+  <script src="lib/katex/auto-render.min.js"></script>
+
+  <!-- Application Data & Logic Scripts -->
+  <script src="js/exercises-data.js"></script>
+  <script src="js/formula-sheet.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
