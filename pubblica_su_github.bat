@@ -1,9 +1,9 @@
 @echo off
-title Pubblicazione su GitHub & GitHub Pages
+title Pubblicazione su GitHub ^& GitHub Pages
 color 0A
 
 echo =======================================================================
-echo          PUBBLICAZIONE SU GITHUB & ATTIVAZIONE GITHUB PAGES
+echo          PUBBLICAZIONE SU GITHUB ^& ATTIVAZIONE GITHUB PAGES
 echo            Elettrotecnica Polimi - Hub Web di Studio
 echo =======================================================================
 echo.
@@ -30,14 +30,14 @@ set /p REPO_URL="Oppure incolla un URL diverso (o premi INVIO): "
 if "%REPO_URL%"=="" set REPO_URL=%DEFAULT_URL%
 
 echo.
-echo  -> Configurazione remote origin: %REPO_URL%
+echo  [*] Configurazione remote origin: %REPO_URL%
 cd /d "%~dp0elettrotecnica-web"
 
 git remote remove origin 2>nul
 git remote add origin %REPO_URL%
 git branch -M main
 
-echo  -> Invio dei file su GitHub (git push)...
+echo  [*] Invio dei file su GitHub (git push)...
 git push -u origin main
 
 if %ERRORLEVEL% EQU 0 (
@@ -55,7 +55,7 @@ if %ERRORLEVEL% EQU 0 (
     echo     - Clicca sul pulsante: Save
     echo.
     echo  Entro 60 secondi il tuo sito sara attivo per sempre all'indirizzo:
-    echo  👉 https://Fedrigh.github.io/elettrotecnica/
+    echo  ^> https://Fedrigh.github.io/elettrotecnica/
     echo.
     echo  Potrai aprirlo e salvarlo come app su qualsiasi telefono, tablet o PC!
     echo =======================================================================
