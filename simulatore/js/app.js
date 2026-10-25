@@ -287,7 +287,7 @@
 
         <!-- Interactive Question Section -->
         <div class="interactive-section">
-          ${ex.type === "mcq" ? buildMcqSection(ex, userAns) : buildNumericSection(ex, userAns)}
+          ${ex.type === "mcq" ? buildMcqSection(ex, userAns) : (ex.type === "structured" ? buildStructuredSection(ex, userAns) : buildNumericSection(ex, userAns))}
         </div>
 
         <!-- Hint Accordion -->
@@ -374,6 +374,53 @@
     `;
   }
 
+  
+  function buildStructuredSection(ex, userAns) {
+    const fields = ex.fields || [];
+    const uFields = userAns && userAns.fields ? userAns.fields : {};
+    const fReviews = userAns && userAns.fieldReviews ? userAns.fieldReviews : {};
+
+    return `
+      <div class="structured-fields-grid" data-id="${ex.id}">
+        <div style="font-size: 0.95rem; font-weight: 700; color: var(--polimi-blue); margin-bottom: 0.5rem;">
+          Inserisci i valori calcolati nei rispettivi campi:
+        </div>
+        ${fields
+          .map((f) => {
+            const val = uFields[f.id] !== undefined ? uFields[f.id] : "";
+            const rev = fReviews[f.id];
+            let statusHtml = "";
+            if (rev) {
+              statusHtml = rev.isCorrect
+                ? `<span class="structured-field-feedback" style="color: var(--success);">✓ Esatto (${f.correct_value} ${f.unit})</span>`
+                : `<span class="structured-field-feedback" style="color: var(--danger);">✗ Errato (Esatto: ${f.correct_value} ${f.unit})</span>`;
+            }
+            return `
+              <div class="structured-row">
+                <span class="structured-label">$${f.label} =$</span>
+                <input type="text" inputmode="decimal" class="form-control structured-input" id="input-${ex.id}-${f.id}" placeholder="${f.placeholder || ""}" value="${val}">
+                <span class="structured-unit">${f.unit}</span>
+                ${statusHtml}
+              </div>
+            `;
+          })
+          .join("")}
+        <div style="margin-top: 0.75rem;">
+          <button class="btn btn-primary" data-action="check-structured" data-id="${ex.id}">Verifica Risposte</button>
+        </div>
+      </div>
+      ${
+        userAns
+          ? `
+        <div class="option-feedback-notice" style="font-size: 0.95rem; margin-top: 0.5rem; color: ${userAns.isCorrect ? "var(--success)" : "var(--danger)"}; font-weight: 700;">
+          ${userAns.isCorrect ? "✓ Tutti i campi sono stati risolti correttamente!" : `Campi corretti: ${userAns.correctCount} su ${fields.length}.`}
+        </div>
+      `
+          : ""
+      }
+    `;
+  }
+
   function formatMarkdownText(txt) {
     if (!txt) return "";
     return txt
@@ -405,6 +452,23 @@
           return;
         }
         handlePracticeNumericAnswer(eid, val);
+      });
+    });
+
+    // Structured check button
+    document.querySelectorAll('[data-action="check-structured"]').forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const eid = e.currentTarget.dataset.id;
+        const ex = state.exercises.find((item) => item.id === eid);
+        if (!ex || !ex.fields) return;
+        const values = {};
+        ex.fields.forEach((f) => {
+          const inp = document.getElementById(`input-${eid}-${f.id}`);
+          if (inp) {
+            values[f.id] = parseNumericInput(inp.value);
+          }
+        });
+        handlePracticeStructuredAnswer(eid, values);
       });
     });
 
@@ -476,6 +540,34 @@
     renderPracticeList();
   }
 
+  
+  function handlePracticeStructuredAnswer(exerciseId, values) {
+    const ex = state.exercises.find((item) => item.id === exerciseId);
+    if (!ex || !ex.fields) return;
+
+    const fieldReviews = {};
+    let correctCount = 0;
+    ex.fields.forEach((f) => {
+      const uVal = values[f.id];
+      const target = f.correct_value;
+      const tol = f.tolerance || 0.05;
+      const allowedDelta = Math.max(0.05, Math.abs(target * tol));
+      const isCorrect = uVal !== undefined && !isNaN(uVal) && Math.abs(uVal - target) <= allowedDelta;
+      if (isCorrect) correctCount++;
+      fieldReviews[f.id] = { userVal: uVal, target, isCorrect };
+    });
+
+    state.userAnswers[exerciseId] = {
+      fields: values,
+      fieldReviews,
+      correctCount,
+      isCorrect: correctCount === ex.fields.length,
+      timestamp: Date.now()
+    };
+    saveUserAnswers();
+    renderPracticeList();
+  }
+
   function toggleBookmark(exerciseId) {
     if (state.bookmarks.has(exerciseId)) {
       state.bookmarks.delete(exerciseId);
@@ -493,51 +585,45 @@
   // --- Official Exam Simulation System ---
   const EXAM_PRESETS = {
     standard: {
-      name: "Simulazione Ufficiale Polimi (8 Quesiti + 2 Esercizi)",
-      description: "Struttura identica alle prove in itinere WeBeep (es. 3 Nov 2023, 13 Nov 2024). Punteggio con penalità: +2.5 pt esatta, -0.625 pt errata, 0 pt non data; Esercizi numerici: 6 pt ciascuno. Totale max 32 punti (30 e lode).",
-      mcqCount: 8,
-      numCount: 2,
-      durationMinutes: 90,
-      scoring: {
-        mcqCorrect: 2.5,
-        mcqWrong: -0.625,
-        mcqBlank: 0,
-        numCorrect: 6.0,
-        numWrong: 0,
-        maxScore: 32.0,
-        passThreshold: 18.0
-      }
-    },
-    quick: {
-      name: "Parziale Rapido (5 Quesiti + 1 Esercizio)",
-      description: "Allenamento sprint focalizzato sul tempo. 5 Quesiti a risposta multipla e 1 Esercizio numerico di sintesi in 45 minuti.",
+      name: "Prova Ufficiale WeBeep (Formato Reale 2 Ore)",
+      description: "Struttura esatta dell'esame WeBeep del Politecnico di Milano: 5 Quesiti a Risposta Multipla (2 pt ciascuno = 10 pt) + 2 Grandi Esercizi Strutturati a Risposte Numeriche (10 pt ciascuno = 20 pt). Totale: 30 Punti con penalità (-0.5 pt sulle errate). Durata: 120 minuti.",
       mcqCount: 5,
-      numCount: 1,
-      durationMinutes: 45,
-      scoring: {
-        mcqCorrect: 4.0,
-        mcqWrong: -1.0,
-        mcqBlank: 0,
-        numCorrect: 10.0,
-        numWrong: 0,
-        maxScore: 30.0,
-        passThreshold: 18.0
-      }
-    },
-    marathon: {
-      name: "Maratona 1° Parziale (12 Quesiti + 3 Esercizi)",
-      description: "Prova ad altissima intensità per testare ogni singolo argomento e consolidare la resistenza all'esame in 120 minuti.",
-      mcqCount: 12,
-      numCount: 3,
+      structCount: 2,
       durationMinutes: 120,
       scoring: {
         mcqCorrect: 2.0,
         mcqWrong: -0.5,
         mcqBlank: 0,
-        numCorrect: 4.0,
-        numWrong: 0,
-        maxScore: 36.0,
+        maxScore: 30.0,
         passThreshold: 18.0
+      }
+    },
+    quick: {
+      name: "Simulazione Rapida WeBeep (60 Minuti)",
+      description: "Allenamento sprint con 3 Quesiti a risposta multipla (2 pt ciascuno) e 1 Grande Esercizio Strutturato (10 pt) in 60 minuti.",
+      mcqCount: 3,
+      structCount: 1,
+      durationMinutes: 60,
+      scoring: {
+        mcqCorrect: 2.0,
+        mcqWrong: -0.5,
+        mcqBlank: 0,
+        maxScore: 16.0,
+        passThreshold: 10.0
+      }
+    },
+    marathon: {
+      name: "Maratona 1° Parziale WeBeep (10 Quesiti + 3 Grandi Esercizi)",
+      description: "Prova ad altissima intensità per testare ogni singolo argomento e consolidare la preparazione in 120 minuti.",
+      mcqCount: 10,
+      structCount: 3,
+      durationMinutes: 120,
+      scoring: {
+        mcqCorrect: 2.0,
+        mcqWrong: -0.5,
+        mcqBlank: 0,
+        maxScore: 50.0,
+        passThreshold: 30.0
       }
     }
   };
@@ -623,8 +709,8 @@
   }
 
   // Sample balanced set ensuring representative coverage across all 6 topics
-  function sampleBalancedExam(mcqCount, numCount) {
-    // 1. Pick MCQ questions with round-robin balanced selection across topics
+  function sampleBalancedExam(mcqCount, structCount) {
+    // 1. Pick MCQ questions across topics
     const mcqTopicQueues = {};
     EXAM_TOPICS.forEach((t) => {
       mcqTopicQueues[t] = shuffleArray(state.exercises.filter((e) => e.type === "mcq" && e.topic === t));
@@ -648,31 +734,12 @@
       mIdx++;
     }
 
-    // 2. Pick Numeric exercises across distinct topics
-    const numTopicQueues = {};
-    EXAM_TOPICS.forEach((t) => {
-      numTopicQueues[t] = shuffleArray(state.exercises.filter((e) => e.type === "numeric" && e.topic === t));
-    });
+    // 2. Pick Structured or Numeric exercises
+    let structs = state.exercises.filter((e) => e.type === "structured");
+    if (structs.length === 0) structs = state.exercises.filter((e) => e.type === "numeric");
+    const pickedStruct = shuffleArray(structs).slice(0, structCount || 2);
 
-    const activeNumTopics = shuffleArray(EXAM_TOPICS.filter((t) => (numTopicQueues[t] || []).length > 0));
-    const pickedNum = [];
-    let nIdx = 0;
-    while (pickedNum.length < numCount) {
-      const currentTopic = activeNumTopics[nIdx % activeNumTopics.length];
-      if (numTopicQueues[currentTopic] && numTopicQueues[currentTopic].length > 0) {
-        pickedNum.push(numTopicQueues[currentTopic].pop());
-      } else {
-        const remaining = state.exercises.filter((e) => e.type === "numeric" && !pickedNum.includes(e));
-        if (remaining.length > 0) {
-          pickedNum.push(shuffleArray(remaining)[0]);
-        } else {
-          break;
-        }
-      }
-      nIdx++;
-    }
-
-    return [...pickedMcq, ...pickedNum];
+    return [...pickedMcq, ...pickedStruct];
   }
 
   function startExamTimer() {
@@ -761,59 +828,91 @@
     const ans = state.exam.answers[index];
     const total = state.exam.questions.length;
 
-    // Difficulty badge
-    let diffBadgeClass = "badge-diff-intermedio";
-    if (q.difficulty === "Base") diffBadgeClass = "badge-diff-base";
-    else if (q.difficulty === "Avanzato") diffBadgeClass = "badge-diff-avanzato";
-    else if (q.difficulty === "Stile Esame Complesso") diffBadgeClass = "badge-diff-complesso";
+    const isAnswered = ans && (
+      (q.type === 'mcq' && ans.selectedOption !== undefined) ||
+      (q.type === 'numeric' && ans.numericValue !== undefined && !isNaN(ans.numericValue)) ||
+      (q.type === 'structured' && ans.fields && Object.keys(ans.fields).length > 0)
+    );
+
+    const pointsMax = q.points ? q.points.toFixed(2).replace('.', ',') : (q.type === 'mcq' ? '2,00' : '10,00');
+
+    let inputHtml = "";
+    if (q.type === "mcq") {
+      inputHtml = `
+        <div style="font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em;">Scegli un'alternativa:</div>
+        <div class="options-grid">
+          ${q.options
+            .map((opt, oIdx) => {
+              const isChecked = ans && ans.selectedOption === oIdx;
+              return `
+              <label class="option-label ${isChecked ? 'opt-checked' : ''}">
+                <input type="radio" name="exam-mcq-${index}" value="${oIdx}" ${isChecked ? "checked" : ""} onchange="window.recordExamMcq(${index}, ${oIdx})">
+                <span>${opt}</span>
+              </label>
+            `;
+            })
+            .join("")}
+        </div>
+      `;
+    } else if (q.type === "structured") {
+      const fields = q.fields || [];
+      const uFields = ans && ans.fields ? ans.fields : {};
+      inputHtml = `
+        <div class="structured-fields-grid">
+          <div style="font-weight: 700; color: var(--polimi-blue); margin-bottom: 0.5rem;">
+            Inserisci i risultati numerici calcolati:
+          </div>
+          ${fields
+            .map((f) => {
+              const val = uFields[f.id] !== undefined ? uFields[f.id] : "";
+              return `
+              <div class="structured-row">
+                <span class="structured-label">$${f.label} =$</span>
+                <input type="text" inputmode="decimal" class="form-control structured-input" id="exam-input-${index}-${f.id}" placeholder="${f.placeholder || ""}" value="${val}" oninput="window.recordExamStructuredField(${index}, '${f.id}', this.value)">
+                <span class="structured-unit">${f.unit}</span>
+              </div>
+            `;
+            })
+            .join("")}
+        </div>
+      `;
+    } else {
+      inputHtml = `
+        <div class="numeric-input-section">
+          <input type="text" inputmode="decimal" class="form-control numeric-input" id="exam-num-input-${index}" placeholder="${q.placeholder || "Valore"}" value="${ans && ans.numericValue !== undefined ? ans.numericValue : ""}" oninput="window.recordExamNum(${index}, this.value)">
+          <span class="unit-label">${q.unit}</span>
+        </div>
+      `;
+    }
 
     const html = `
-      <div class="exercise-card" style="box-shadow: none; border-color: transparent; padding: 0;">
-        <div class="card-header-row">
-          <div class="badge-cluster">
-            <span class="badge badge-id">Quesito ${index + 1} di ${total}</span>
-            <span class="badge badge-topic">${q.topic}</span>
-            <span class="badge ${diffBadgeClass}">${q.difficulty}</span>
-            <span class="badge badge-type">${q.type === "mcq" ? "Risposta Multipla" : "Calcolo Aperto"}</span>
+      <div class="webeep-question-layout">
+        <!-- WeBeep Left Card -->
+        <div class="webeep-info-box">
+          <div class="q-title">Domanda <strong>${index + 1}</strong></div>
+          <div class="q-status ${isAnswered ? 'saved' : ''}">
+            ${isAnswered ? 'Risposta salvata' : 'Risposta non ancora data'}
           </div>
-          <button class="btn btn-secondary" onclick="window.toggleExamFlag(${index})">
-            ${state.exam.flagged.has(index) ? "★ Contrassegnata" : "☆ Segna per dopo"}
+          <div class="q-points">Punteggio max.: ${pointsMax}</div>
+          <button class="webeep-flag-btn" onclick="window.toggleExamFlag(${index})">
+            <span>${state.exam.flagged.has(index) ? '🚩' : '⚐'}</span>
+            <span>${state.exam.flagged.has(index) ? 'Contrassegnata' : 'Contrassegna domanda'}</span>
           </button>
         </div>
 
-        <div class="question-body">
-          <p>${q.question}</p>
-        </div>
+        <!-- WeBeep Right Content -->
+        <div class="webeep-content-box">
+          <div class="circuit-wrapper">
+            ${q.svg}
+          </div>
 
-        <div class="circuit-wrapper">
-          ${q.svg}
-        </div>
+          <div class="question-body">
+            <p>${q.question}</p>
+          </div>
 
-        <div class="interactive-section" style="margin-top: 1.5rem;">
-          ${
-            q.type === "mcq"
-              ? `
-            <div class="options-grid">
-              ${q.options
-                .map((opt, oIdx) => {
-                  const isChecked = ans && ans.selectedOption === oIdx;
-                  return `
-                  <label class="option-label">
-                    <input type="radio" name="exam-mcq-${index}" value="${oIdx}" ${isChecked ? "checked" : ""} onchange="window.recordExamMcq(${index}, ${oIdx})">
-                    <span>${opt}</span>
-                  </label>
-                `;
-                })
-                .join("")}
-            </div>
-          `
-              : `
-            <div class="numeric-input-section">
-              <input type="text" inputmode="decimal" class="form-control numeric-input" id="exam-num-input-${index}" placeholder="${q.placeholder || "Valore"}" value="${ans && ans.numericValue !== undefined ? ans.numericValue : ""}" oninput="window.recordExamNum(${index}, this.value)">
-              <span class="unit-label">${q.unit}</span>
-            </div>
-          `
-          }
+          <div class="interactive-section">
+            ${inputHtml}
+          </div>
         </div>
       </div>
     `;
@@ -821,10 +920,36 @@
     elements.examQuestionContainer.innerHTML = html;
     renderMath(elements.examQuestionContainer);
 
-    // Prev / Next button states
     elements.btnExamPrev.disabled = index <= 0;
     elements.btnExamNext.disabled = index >= total - 1;
   }
+
+  window.recordExamStructuredField = function (qIndex, fieldId, valStr) {
+    if (!state.exam.answers[qIndex]) {
+      state.exam.answers[qIndex] = { fields: {} };
+    }
+    if (!state.exam.answers[qIndex].fields) {
+      state.exam.answers[qIndex].fields = {};
+    }
+    const val = parseNumericInput(valStr);
+    if (!isNaN(val)) {
+      state.exam.answers[qIndex].fields[fieldId] = val;
+    } else {
+      delete state.exam.answers[qIndex].fields[fieldId];
+    }
+    renderExamPalette();
+    const hasAnswers = Object.keys(state.exam.answers[qIndex].fields).length > 0;
+    const statusElem = document.querySelector('.webeep-info-box .q-status');
+    if (statusElem) {
+      if (hasAnswers) {
+        statusElem.textContent = 'Risposta salvata';
+        statusElem.classList.add('saved');
+      } else {
+        statusElem.textContent = 'Risposta non ancora data';
+        statusElem.classList.remove('saved');
+      }
+    }
+  };
 
   window.toggleExamFlag = function (index) {
     if (state.exam.flagged.has(index)) {
@@ -900,13 +1025,35 @@
 
       if (q.type === "mcq") {
         if (!userAns || userAns.selectedOption === undefined) {
-          points = scoring.mcqBlank;
+          points = scoring.mcqBlank || 0;
         } else if (userAns.selectedOption === q.correct_index) {
           isCorrect = true;
-          points = scoring.mcqCorrect;
+          points = scoring.mcqCorrect || 2.0;
         } else {
           isCorrect = false;
-          points = scoring.mcqWrong;
+          points = scoring.mcqWrong || -0.5;
+        }
+      } else if (q.type === "structured") {
+        const qFields = q.fields || [];
+        const maxPoints = q.points || 10.0;
+        const fieldPoints = maxPoints / qFields.length;
+        let correctFields = 0;
+        const fieldReviews = {};
+
+        qFields.forEach((f) => {
+          const uVal = userAns && userAns.fields ? userAns.fields[f.id] : undefined;
+          const target = f.correct_value;
+          const tol = f.tolerance || 0.05;
+          const allowedDelta = Math.max(0.05, Math.abs(target * tol));
+          const fCorrect = uVal !== undefined && !isNaN(uVal) && Math.abs(uVal - target) <= allowedDelta;
+          if (fCorrect) correctFields++;
+          fieldReviews[f.id] = { userVal: uVal, target, isCorrect: fCorrect };
+        });
+
+        points = correctFields * fieldPoints;
+        isCorrect = correctFields === qFields.length;
+        if (userAns) {
+          userAns.fieldReviews = fieldReviews;
         }
       } else {
         // Numeric
@@ -918,14 +1065,13 @@
           const allowedDelta = Math.max(0.05, Math.abs(target * tol));
           if (Math.abs(userAns.numericValue - target) <= allowedDelta) {
             isCorrect = true;
-            points = scoring.numCorrect;
+            points = scoring.numCorrect || 4.0;
           } else {
             isCorrect = false;
-            points = scoring.numWrong;
+            points = scoring.numWrong || 0;
           }
         }
       }
-
       totalScore += points;
       reviewDetails.push({
         question: q,
@@ -1024,10 +1170,21 @@
                       <div><strong>La tua risposta:</strong> ${rev.userAns && rev.userAns.selectedOption !== undefined ? q.options[rev.userAns.selectedOption] : "<em>Lasciata in bianco</em>"}</div>
                       <div><strong>Risposta corretta:</strong> ${q.options[q.correct_index]}</div>
                     `
+                        : (q.type === "structured"
+                        ? `
+                      <div><strong>Esito campi strutturati:</strong></div>
+                      ${(q.fields || []).map(f => {
+                        const fRev = rev.userAns && rev.userAns.fieldReviews ? rev.userAns.fieldReviews[f.id] : null;
+                        const uVal = fRev && fRev.userVal !== undefined ? `${fRev.userVal} ${f.unit}` : "<em>Non inserito</em>";
+                        const okIcon = fRev && fRev.isCorrect ? "✓" : "✗";
+                        const col = fRev && fRev.isCorrect ? "var(--success)" : "var(--danger)";
+                        return `<div style="margin-left: 0.75rem; color: ${col}; font-weight: 600;">${okIcon} $${f.label}$: Tuo: ${uVal} — Corretto: ${f.correct_value} ${f.unit}</div>`;
+                      }).join("")}
+                    `
                         : `
                       <div><strong>Il tuo valore inserito:</strong> ${rev.userAns && rev.userAns.numericValue !== undefined ? `${rev.userAns.numericValue} ${q.unit}` : "<em>Lasciato in bianco</em>"}</div>
                       <div><strong>Valore corretto:</strong> ${q.correct_value} ${q.unit}</div>
-                    `
+                    `)
                     }
                   </div>
 

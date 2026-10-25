@@ -925,3 +925,133 @@ footer.app-footer {
   color: var(--text-muted);
   margin-top: auto;
 }
+
+
+/* ==========================================================================
+   WeBeep Authentic Polimi Exam Styles
+   ========================================================================== */
+.webeep-question-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 800px) {
+  .webeep-question-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.webeep-info-box {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  height: fit-content;
+}
+
+.webeep-info-box .q-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 0.35rem;
+}
+
+.webeep-info-box .q-status {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.webeep-info-box .q-status.saved {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.webeep-info-box .q-points {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-color);
+  padding-top: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.webeep-flag-btn {
+  background: transparent;
+  border: none;
+  font-size: 0.85rem;
+  color: var(--polimi-accent);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  padding: 0;
+}
+
+.webeep-content-box {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Structured Multi-field Rows */
+.structured-fields-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  margin: 1rem 0;
+}
+
+.structured-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.structured-label {
+  font-weight: 700;
+  font-size: 1.05rem;
+  min-width: 90px;
+  color: var(--text-main);
+}
+
+.structured-input {
+  width: 140px;
+  padding: 0.5rem 0.75rem;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: 600;
+  background: var(--bg-card);
+  color: var(--text-main);
+}
+
+.structured-input:focus {
+  border-color: var(--polimi-accent);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
+}
+
+.structured-unit {
+  font-weight: 700;
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.structured-field-feedback {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
