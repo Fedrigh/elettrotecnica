@@ -585,45 +585,45 @@
   // --- Official Exam Simulation System ---
   const EXAM_PRESETS = {
     standard: {
-      name: "Prova Ufficiale WeBeep (Formato Reale 2 Ore)",
-      description: "Struttura esatta dell'esame WeBeep del Politecnico di Milano: 5 Quesiti a Risposta Multipla (2 pt ciascuno = 10 pt) + 2 Grandi Esercizi Strutturati a Risposte Numeriche (10 pt ciascuno = 20 pt). Totale: 30 Punti con penalità (-0.5 pt sulle errate). Durata: 120 minuti.",
-      mcqCount: 5,
+      name: "Simulazione Ufficiale WeBeep (Formato Reale Parziale)",
+      description: "Struttura esatta dell'esame WeBeep del Politecnico di Milano: 8 Quesiti a Risposta Multipla (+2.5 pt se corretta, -0.625 pt se errata = 20 pt) + 2 Esercizi Numerici Strutturati (6.0 pt ciascuno = 12 pt). Totale: 32 Punti (30 e Lode con >= 31 pt). Durata: 75 minuti.",
+      mcqCount: 8,
       structCount: 2,
-      durationMinutes: 120,
+      durationMinutes: 75,
       scoring: {
-        mcqCorrect: 2.0,
-        mcqWrong: -0.5,
+        mcqCorrect: 2.5,
+        mcqWrong: -0.625,
         mcqBlank: 0,
-        maxScore: 30.0,
+        maxScore: 32.0,
         passThreshold: 18.0
       }
     },
     quick: {
-      name: "Simulazione Rapida WeBeep (60 Minuti)",
-      description: "Allenamento sprint con 3 Quesiti a risposta multipla (2 pt ciascuno) e 1 Grande Esercizio Strutturato (10 pt) in 60 minuti.",
-      mcqCount: 3,
+      name: "Simulazione Rapida WeBeep (45 Minuti)",
+      description: "Allenamento sprint con 4 Quesiti (+2.5 pt, -0.625 pt) e 1 Esercizio Numerico (6.0 pt) in 45 minuti. Totale: 16 Punti.",
+      mcqCount: 4,
       structCount: 1,
-      durationMinutes: 60,
+      durationMinutes: 45,
       scoring: {
-        mcqCorrect: 2.0,
-        mcqWrong: -0.5,
+        mcqCorrect: 2.5,
+        mcqWrong: -0.625,
         mcqBlank: 0,
         maxScore: 16.0,
-        passThreshold: 10.0
+        passThreshold: 9.0
       }
     },
     marathon: {
-      name: "Maratona 1° Parziale WeBeep (10 Quesiti + 3 Grandi Esercizi)",
-      description: "Prova ad altissima intensità per testare ogni singolo argomento e consolidare la preparazione in 120 minuti.",
-      mcqCount: 10,
+      name: "Maratona 1° Parziale WeBeep (12 Quesiti + 3 Esercizi)",
+      description: "Prova ad altissima intensità per testare tutti i 6 argomenti in 120 minuti: 12 Quesiti (+2.5 pt / -0.625 pt) + 3 Esercizi Numerici (6 pt cad.). Totale: 48 Punti.",
+      mcqCount: 12,
       structCount: 3,
       durationMinutes: 120,
       scoring: {
-        mcqCorrect: 2.0,
-        mcqWrong: -0.5,
+        mcqCorrect: 2.5,
+        mcqWrong: -0.625,
         mcqBlank: 0,
-        maxScore: 50.0,
-        passThreshold: 30.0
+        maxScore: 48.0,
+        passThreshold: 27.0
       }
     }
   };
@@ -652,7 +652,7 @@
               <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1rem;">${p.description}</p>
               <div style="display: flex; gap: 0.75rem; align-items: center;">
                 <button class="btn btn-primary" onclick="event.stopPropagation(); window.startExam('${key}')">Avvia Prova</button>
-                <span style="font-size: 0.85rem; color: var(--text-muted);">${p.mcqCount} Domande MCQ + ${p.numCount} Esercizi Numerici</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">${p.mcqCount} Quesiti (+2.5/-0.625 pt) + ${p.structCount} Esercizi Numerici (6 pt cad.)</span>
               </div>
             </div>
           `
@@ -665,7 +665,7 @@
 
   window.startExam = function (presetKey) {
     const config = EXAM_PRESETS[presetKey] || EXAM_PRESETS.standard;
-    const questions = sampleBalancedExam(config.mcqCount, config.numCount);
+    const questions = sampleBalancedExam(config.mcqCount, config.structCount);
 
     state.exam = {
       active: true,
@@ -693,10 +693,10 @@
   const EXAM_TOPICS = [
     "Circuiti in Regime Stazionario (DC)",
     "Thévenin, Norton & Generatori Pilotati",
-    "Bipoli Non Lineari & Diodi Ideali",
     "Amplificatori Operazionali (OP-AMP)",
-    "Doppi Bipoli & Trasformatore Ideale",
-    "Regime Sinusoidale Monofase (AC)"
+    "Bipoli Non Lineari & Diodi Ideali",
+    "Metodi Sistematici & Analisi Nodale (NA / MNA)",
+    "Doppi Bipoli & Trasformatore Ideale"
   ];
 
   function shuffleArray(arr) {
@@ -834,7 +834,7 @@
       (q.type === 'structured' && ans.fields && Object.keys(ans.fields).length > 0)
     );
 
-    const pointsMax = q.points ? q.points.toFixed(2).replace('.', ',') : (q.type === 'mcq' ? '2,00' : '10,00');
+    const pointsMax = q.points ? q.points.toFixed(2).replace('.', ',') : (q.type === 'mcq' ? '2,50' : '6,00');
 
     let inputHtml = "";
     if (q.type === "mcq") {
